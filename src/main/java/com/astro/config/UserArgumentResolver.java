@@ -29,7 +29,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         Class<?> clazz = parameter.getParameterType();
-        return clazz== User.class;
+        return clazz == User.class;
     }
 
     @Override
@@ -37,21 +37,25 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 
-       String paramToken=request.getParameter(UserService.COOKI_NAME_TOKEN);
-       String cookieToken=getCookieValue(request,UserService.COOKI_NAME_TOKEN);
+        String paramToken = request.getParameter(UserService.COOKI_NAME_TOKEN);
+        String cookieToken = getCookieValue(request, UserService.COOKI_NAME_TOKEN);
 
-        if (StringUtils.isEmpty(cookieToken)&&StringUtils.isEmpty(paramToken)){
+        if (StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)) {
             return null;
         }
-        String token =StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
-        User user=userService.getByToken(response,token);
+        String token = StringUtils.isEmpty(paramToken) ? cookieToken : paramToken;
+        User user = userService.getByToken(response, token);
         return user;
     }
 
     private String getCookieValue(HttpServletRequest request, String cookiNameToken) {
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie:cookies){
-            if (cookie.getName().equals(cookiNameToken)){
+        if (cookies == null || cookies.length <= 0) {
+            return null;
+        }
+
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals(cookiNameToken)) {
                 return cookie.getValue();
             }
         }

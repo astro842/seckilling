@@ -1,6 +1,7 @@
 package com.astro.dao;
 
 import com.astro.domain.User;
+import com.astro.domain.User1;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,12 +20,12 @@ import static org.junit.Assert.*;
 public class UserDaoTest {
 
     @Autowired
-    private UserDao userDao;
+    private User1Dao userDao;
 
     @Test
     public void getById() throws Exception {
 
-        User id = userDao.getById(2);
+        User1 id = userDao.getById(2);
         System.out.println(id);
     }
 

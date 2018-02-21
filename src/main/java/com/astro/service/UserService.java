@@ -35,8 +35,18 @@ public class UserService {
     @Autowired
     private RedisService redisService;
 
-    public User getById(long i) {
-        return userDao.getById(1);
+    public User getById(long id) {
+        //取缓存
+        User user = redisService.get(UserKey.getById, "" + id, User.class);
+        if (user!=null){
+            return user;
+        }
+        //取数据库
+        user = userDao.getById(id);
+        if (user!=null){
+            redisService.set(UserKey.getById,""+id,user);
+        }
+        return user;
     }
 
     public CodeMsg login(HttpServletResponse response, LoginVO loginVO) {
@@ -63,13 +73,14 @@ public class UserService {
 
         //用户登录成功后  生成token返回去给客户端
         //生成cookis
-        addCookie(response, user);
+        String token = UUIDUtil.uuid();
+        addCookie(response,token, user);
 
         return CodeMsg.SUCCESS;
     }
 
-    private void addCookie(HttpServletResponse response, User user) {
-        String token = UUIDUtil.uuid();
+    private void addCookie(HttpServletResponse response,String token, User user) {
+
         redisService.set(UserKey.token, token, user);
         Cookie cookie = new Cookie(COOKI_NAME_TOKEN, token);
         cookie.setMaxAge(UserKey.token.expireSeconds());
@@ -84,7 +95,7 @@ public class UserService {
         User user = redisService.get(UserKey.token, token, User.class);
         //重新addcookie 延长有效期
         if (user != null){
-            addCookie(response,user);
+            addCookie(response,token, user);
         }
             return user;
     }

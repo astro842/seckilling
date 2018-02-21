@@ -7,7 +7,11 @@ import com.fasterxml.jackson.databind.ser.Serializers;
  */
 public class OrderKey extends BasePrefix{
 
-    public OrderKey(int expireSeconds, String predix) {
-        super(expireSeconds, predix);
+    public OrderKey(String predix) {
+        super( predix);
     }
+
+    public static OrderKey getSeckillOrderByUidGid = new OrderKey("seckillUidGid");
+
+
 }

@@ -17,6 +17,7 @@ public class RedisService {
     JedisPool jedisPool;
 
 
+
     public <T> T get(KeyPrefix prefix, String key, Class<T> clazz) {
         Jedis jedis = null;
         try {
@@ -30,7 +31,8 @@ public class RedisService {
             returnToPool(jedis);
         }
     }
-
+    //UserKey:tkb8d1e312f32840449526a6ec661eb141
+    //prefix = UserKey:tk     key=  token = UUIDUtil.uuid()
     public <T> boolean set(KeyPrefix prefix, String key, T value) {
         Jedis jedis = null;
         try {
