@@ -11,6 +11,7 @@ public class GoodsKey extends BasePrefix{
         super(expireSeconds,predix);
     }
 
-    public static GoodsKey getGoodsList = new GoodsKey(600,"gl");
-    public static GoodsKey getGoodsDetail = new GoodsKey(600,"gd");
+    public static GoodsKey getGoodsList = new GoodsKey(600,"goodsList");
+    public static GoodsKey getGoodsDetail = new GoodsKey(600,"goodsDetail");
+    public static GoodsKey getSeckillGoodsStock = new GoodsKey(0,"sGoodsStock");
 }

@@ -34,10 +34,10 @@ public class LoginController {
    @Autowired
    private UserService userService;
 
-   @RequestMapping("/to_login")
-    public String toLogin(){
-       return "login";
-   }
+//   @RequestMapping("/to_login")
+//    public String toLogin(){
+//       return "login";
+//   }
 
     @RequestMapping("/do_login")
     @ResponseBody
@@ -63,6 +63,9 @@ public class LoginController {
         }else {
             return Result.errer(cm);
         }
+
+//        String token = userService.login(response,loginVO);
+//        return Result.success(token);
     }
 
 }

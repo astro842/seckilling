@@ -48,13 +48,14 @@ public class OrderService {
         orderInfo.setOrderChannel(1);
         orderInfo.setStatus(0);
         orderInfo.setUserId(user.getId());
-        long orderId=orderDao.insert(orderInfo);
+
+        orderDao.insert(orderInfo);
 
         //seckill order
         SeckillOrder order=new SeckillOrder();
         order.setGoodsId(goods.getId());
         order.setUserId(user.getId());
-        order.setOrderId(orderId);
+        order.setOrderId(orderInfo.getId());
         orderDao.insertSeckillOrder(order);
 
         redisService.set(OrderKey.getSeckillOrderByUidGid,""+user.getId()+"_"+goods.getId(),order);

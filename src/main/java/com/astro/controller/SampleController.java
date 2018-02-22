@@ -3,6 +3,7 @@ package com.astro.controller;
 
 import com.astro.domain.User;
 import com.astro.domain.User1;
+import com.astro.rabbitmq.MQSender;
 import com.astro.redis.UserKey;
 import com.astro.redis.UserKey1;
 import com.astro.result.Result;
@@ -22,6 +23,35 @@ public class SampleController {
 
    @Autowired
    private RedisService redisService;
+
+   @Autowired
+    MQSender mqSender;
+
+
+
+//    @RequestMapping("/mq/fanout")
+//    @ResponseBody
+//    public Result<String> mqtestFanout(){
+//        mqSender.sendFanout("fanout------");
+//        return Result.success("success");
+//    }
+//
+//    @RequestMapping("/mq/topic")
+//    @ResponseBody
+//    public Result<String> mqtestTopic(){
+//        mqSender.sendTopic("hahahahhahahahahhah");
+//        return Result.success("success");
+//    }
+//
+//
+//    @RequestMapping("/mq")
+//    @ResponseBody
+//    public Result<String> mqtest(){
+//        mqSender.send("hahahahhahahahahhah");
+//        return Result.success("success");
+//    }
+
+
 
    @RequestMapping("/redis/get")
    @ResponseBody

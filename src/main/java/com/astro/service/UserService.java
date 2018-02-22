@@ -76,7 +76,8 @@ public class UserService {
         String token = UUIDUtil.uuid();
         addCookie(response,token, user);
 
-        return CodeMsg.SUCCESS;
+       return CodeMsg.SUCCESS;
+        //return token;
     }
 
     private void addCookie(HttpServletResponse response,String token, User user) {

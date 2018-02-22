@@ -2,6 +2,7 @@ package com.astro.dao;
 
 import com.astro.VO.GoodsVo;
 import com.astro.domain.Goods;
+import com.astro.domain.SeckillGoods;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +27,14 @@ public class GoodsDaoTest {
     private GoodsDao goodsDao;
 
     @Test
+    public void reductStock() throws Exception {
+        SeckillGoods g = new SeckillGoods();
+        g.setGoodsId(3l);
+        int i = goodsDao.reduceStock(g);
+        System.out.println("-----------------"+i);
+    }
+
+    @Test
     public void getGoodsVoList() throws Exception {
         List<GoodsVo> goodsVoList = goodsDao.getGoodsVoList();
         System.out.println(goodsVoList.get(0));
@@ -36,6 +45,7 @@ public class GoodsDaoTest {
         List<Goods> goodsList = goodsDao.getGoods();
         System.out.println(goodsList);
     }
+
     @Test
     public void getGoodsVoById() throws Exception {
         GoodsVo goodsVoById = goodsDao.getGoodsVoById(3);
