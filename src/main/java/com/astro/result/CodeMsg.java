@@ -12,6 +12,8 @@ public enum  CodeMsg {
     //通用
     SUCCESS(0, "操作成功"),
     SERVER_ERROR(500100,"服务端异常"),
+    REQUEST_ILLEGAL(500101,"请求非法"),
+    ACCESS_LIMIT(500102 ,"访问太频繁"),
     //登录模块  5002XX
     SESSION_ERROR(500210,"session不存在"),
     PASSWORD_EMPTY(500211,"密码不能为空"),
@@ -26,7 +28,9 @@ public enum  CodeMsg {
 
     //秒杀模块 5005XX
     SECKILL_OVER(500500,"商品秒杀完毕"),
-    SECKILL_REPEATE(500501,"重复秒杀")
+    SECKILL_REPEATE(500501,"重复秒杀"),
+    SECKILL_FAIL(500502,"秒杀失败"),
+    VERIFYCODE_ERROR(500503,"验证码错误")
     ;
 
     private int code;

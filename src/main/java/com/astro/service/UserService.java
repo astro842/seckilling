@@ -74,6 +74,7 @@ public class UserService {
         //用户登录成功后  生成token返回去给客户端
         //生成cookis
         String token = UUIDUtil.uuid();
+        log.info("-------token:"+token);
         addCookie(response,token, user);
 
        return CodeMsg.SUCCESS;

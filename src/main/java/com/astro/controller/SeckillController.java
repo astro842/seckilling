@@ -1,13 +1,18 @@
 package com.astro.controller;
 
+import com.astro.Util.MD5Util;
+import com.astro.Util.UUIDUtil;
 import com.astro.VO.GoodsVo;
+import com.astro.access.AccessLimit;
 import com.astro.domain.OrderInfo;
 import com.astro.domain.SeckillOrder;
 import com.astro.domain.User;
 import com.astro.rabbitmq.MQSender;
 import com.astro.rabbitmq.SeckillMsg;
+import com.astro.redis.AccessKey;
 import com.astro.redis.GoodsKey;
 import com.astro.redis.RedisService;
+import com.astro.redis.SeckillKey;
 import com.astro.result.CodeMsg;
 import com.astro.result.Result;
 import com.astro.service.GoodsService;
@@ -18,11 +23,14 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,28 +68,71 @@ public class SeckillController implements InitializingBean {
         log.info("-----------执行了init");
         for (GoodsVo goods : goodsVoList) {
             redisService.set(GoodsKey.getSeckillGoodsStock, "" + goods.getId(), goods.getStockCount());
-            localOverMap.put(goods.getId(),false);
+            localOverMap.put(goods.getId(), false);
         }
 
     }
 
-    //b7797cce01b4b131b433b6acf4add449
-    //添加rabbitMq
-    @RequestMapping("/do_seckill")
+    @AccessLimit(seconds = 10, maxCount = 2, needLogin = true)
+    @RequestMapping("/path")
     @ResponseBody
-    public Result<Integer> lis(Model model, User user,
-                               @RequestParam("goodsId") long goodId) {
+    public Result<String> getSeckillPath(HttpServletRequest request, User user,
+                                         @RequestParam("goodsId") long goodId,
+                                         @RequestParam(value = "verifyCode") int verifyCode) {
         //判断登录状态
         if (user == null) {
             return Result.errer(CodeMsg.SESSION_ERROR);
         }
+        //查询访问次数
+//        String uri = request.getRequestURI();
+//        StringBuffer url=request.getRequestURL();
+//        log.info("------------uri:"+uri);
+//        log.info("------------url:"+url);
+//        String key=uri+"_"+user.getId();
+//        Integer count = redisService.get(AccessKey.accessKey, key, Integer.class);
+//        if (count==null){
+//            redisService.set(AccessKey.accessKey, key, 1);
+//        }else if(count<5){
+//            redisService.incr(AccessKey.accessKey,key);
+//        }else {
+//            return Result.errer(CodeMsg.ACCESS_LIMIT);
+//        }
 
+
+        //验证验证码
+        boolean check = seckillService.checkVerifyCode(user, goodId, verifyCode);
+        if (!check) {
+            return Result.errer(CodeMsg.VERIFYCODE_ERROR);
+        }
+        //生成path
+        String path = seckillService.createPath(user, goodId);
+        return Result.success(path);
+    }
+
+
+    //b7797cce01b4b131b433b6acf4add449
+    //添加rabbitMq
+    @RequestMapping("/{path}/do_seckill")
+    @ResponseBody
+    public Result<Integer> lis(Model model, User user,
+                               @RequestParam("goodsId") long goodId,
+                               @PathVariable("path") String path) {
+        //判断登录状态
+        if (user == null) {
+            return Result.errer(CodeMsg.SESSION_ERROR);
+        }
+        //验证 path
+        boolean check = seckillService.checkPath(user, goodId, path);
+        if (!check) {
+            return Result.errer(CodeMsg.REQUEST_ILLEGAL);
+        }
+        //内存標記 较少redis访问
         Boolean isOver = localOverMap.get(goodId);
-        if (isOver){
+        if (isOver) {
             return Result.errer(CodeMsg.SECKILL_OVER);
         }
         //判断是否多次秒杀
-        log.info("-------判断是否多次秒杀");
+        log.info("-------判断是否多次秒杀(redis)");
         SeckillOrder order = orderService.getSeckillOrderByUserIdGoodsId(user.getId(), goodId);
         if (order != null) {
             return Result.errer(CodeMsg.SECKILL_REPEATE);
@@ -92,10 +143,12 @@ public class SeckillController implements InitializingBean {
         Long stock = redisService.decr(GoodsKey.getSeckillGoodsStock, "" + goodId);
 
         if (stock < 0) {
-            localOverMap.put(goodId,true);
+            localOverMap.put(goodId, true);
             return Result.errer(CodeMsg.SECKILL_OVER);
         }
-        //入队
+
+
+        //入队---------------------------------------
         log.info("--------入队");
         SeckillMsg sm = new SeckillMsg();
         sm.setUser(user);
@@ -123,6 +176,32 @@ public class SeckillController implements InitializingBean {
         return Result.success(result);
 
     }
+
+    @GetMapping("/verifyCode")
+    @ResponseBody
+    public Result<Long> getSeckillverifyCodeerifyCode(HttpServletResponse response, User user,
+                                                      @RequestParam("goodsId") long goodId) {
+        //判断登录状态
+        if (user == null) {
+            return Result.errer(CodeMsg.SESSION_ERROR);
+        }
+        try {
+            BufferedImage image = seckillService.createVerifyCode(user, goodId);
+            OutputStream out = response.getOutputStream();
+            ImageIO.write(image, "JPEG", out);
+            out.flush();
+            out.close();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Result.errer(CodeMsg.SECKILL_FAIL);
+        }
+
+
+    }
+
+
+
 
 
     //页面静态化 直接返回Result（data）

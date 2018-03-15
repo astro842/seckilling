@@ -14,16 +14,22 @@ public class MD5Util {
         return DigestUtils.md5Hex(src);
     }
 
-
-    public static String inputPassToFormPass(String inputPass){
-        String str=""+salt.charAt(0)+salt.charAt(2)+inputPass+salt.charAt(5)+salt.charAt(4);
-        return md5(str);
-    }
-
+    //系统用的 前端处理好第一次md6传过这里  用用户的salt再一次md5
     public static String FormPassToDbPass(String inputPass,String salt){
         String str=""+salt.charAt(0)+salt.charAt(2)+inputPass+salt.charAt(5)+salt.charAt(4);
         return md5(str);
     }
+
+
+
+    //用户输入密码 第一次md5(没用) 前端已经做了
+    public static String inputPassToFormPass(String inputPass){
+        String str=""+salt.charAt(0)+salt.charAt(2)+inputPass+salt.charAt(5)+salt.charAt(4);
+        System.out.println(str);
+        return md5(str);
+    }
+
+
 
     public static String inputPassToDbPass(String input,String saltDB){
         String FormPass=inputPassToFormPass(input);

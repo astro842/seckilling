@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Locale;
 
 
 /**
@@ -34,10 +35,10 @@ public class LoginController {
    @Autowired
    private UserService userService;
 
-//   @RequestMapping("/to_login")
-//    public String toLogin(){
-//       return "login";
-//   }
+   @RequestMapping("/to_login")
+    public String toLogin(){
+       return "login";
+   }
 
     @RequestMapping("/do_login")
     @ResponseBody
@@ -46,6 +47,7 @@ public class LoginController {
         //校验参数
         String password=loginVO.getPassword();
         String mobile=loginVO.getMobile();
+        log.info("---------password密码:"+password);
         if (StringUtils.isEmpty(password)){
             return Result.errer(CodeMsg.PASSWORD_EMPTY);
         }

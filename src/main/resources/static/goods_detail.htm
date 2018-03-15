@@ -48,8 +48,15 @@
                         <button class="btn btn-primary btn-block" type="submit" id="buyButton">立即秒杀</button>
                         <input type="hidden" name="goodsId"  id="goodsId" />
                     </form>-->
-                <button class="btn btn-primary btn-block" type="button" id="buyButton" onclick="doSeckill()">立即秒杀
-                </button>
+                <div class="row">
+                    <div class="form-inline">
+                        <img id="verifyCodeImg" width="80" height="32" style="display: none" onclick="refreshVerifyCode()"/>
+                        <input id="verifyCode" class="form-control "style="display: none"/>
+                        <button class="btn btn-primary btn-block" type="button" id="buyButton"
+                                onclick="getSeckillPath()">立即秒杀
+                        </button>
+                    </div>
+                </div>
                 <input type="hidden" name="goodsId" id="goodsId"/>
             </td>
         </tr>
@@ -69,6 +76,31 @@
 </div>
 </body>
 <script>
+
+    function getSeckillPath() {
+        var goodsId = $("#goodsId").val();
+        $.ajax({
+            url: '/seckill/path',
+            type: 'GET',
+            data: {
+                goodsId: $("#goodsId").val(),
+                verifyCode:$("#verifyCode").val()
+            },
+            success: function (data) {
+                if (data.code == 0) {
+                    var path = data.data;
+                    console.log("path:" + path);
+                    doSeckill(path);
+                } else {
+                    layer.msg(data.msg);
+                }
+            },
+            error: function () {
+                layer.msg("客户端请求有误5");
+            }
+        });
+    }
+      //轮询
     function getSeckillResult(goodsId) {
         g_showLoading();
         $.ajax({
@@ -86,13 +118,14 @@
                         //继续轮询
                         setTimeout(function () {
                             getSeckillResult(goodsId);
-                        },50);
+                        }, 50);
                     } else {
                         layer.confirm("恭喜你，秒杀成功", {btn: ["确定", "取消"]}),
                             function () {
                                 window.location.href = "/order_detail.htm?orderId=" + data.data.id;
-                            }, function () {
-                                layer.closeAll();
+                            },
+                            function () {
+                            layer.closeAll();
                         }
                     }
                 } else {
@@ -105,12 +138,13 @@
         });
     }
 
-    function doSeckill() {
+    function doSeckill(path) {
         $.ajax({
-            url: "/seckill/do_seckill",
+            url: "/seckill/" + path + "/do_seckill",
             type: "POST",
             data: {
                 goodsId: $("#goodsId").val(),
+
             },
             success: function (data) {
                 if (data.code == 0) {
@@ -185,11 +219,19 @@
                 clearTimeout(timeout);
             }
             $("#miaoshaTip").html("秒杀进行中");
+            $("#verifyCodeImg").attr("src","/seckill/verifyCode?goodsId="+$("#goodsId").val());
+            $("#verifyCode").show();
+            $("#verifyCodeImg").show();
+
         } else {//秒杀已经结束
             $("#buyButton").attr("disabled", true);
             $("#miaoshaTip").html("秒杀已经结束");
+            $("#verifyCode").hide();
+            $("#verifyCodeImg").hide();
         }
     }
-
+     function refreshVerifyCode() {
+         $("#verifyCodeImg").attr("src","/seckill/verifyCode?goodsId="+$("#goodsId").val()+"&timestamp="+new Date().getTime());
+     }
 </script>
 </html>

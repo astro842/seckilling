@@ -21,7 +21,7 @@ public class MQSender {
 
     public void sendSeckillMsg(SeckillMsg sm) {
         String msgg=redisService.beanToString(sm);
-        log.info("--------------sender msg:"+msgg);
+        log.info("--------------入队了---sender msg:"+msgg);
         amqpTemplate.convertAndSend(MQConfig.SECKILL_QUEUE,msgg);
     }
 

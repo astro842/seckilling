@@ -1,6 +1,7 @@
 package com.astro.config;
 
 
+import com.astro.access.UserContext;
 import com.astro.domain.User;
 import com.astro.service.UserService;
 import com.sun.org.apache.regexp.internal.RE;
@@ -34,18 +35,21 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-        HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+//        HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+//        HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
+//
+//        String paramToken = request.getParameter(UserService.COOKI_NAME_TOKEN);
+//        String cookieToken = getCookieValue(request, UserService.COOKI_NAME_TOKEN);
+//
+//        if (StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)) {
+//            return null;
+//        }
+//        String token = StringUtils.isEmpty(paramToken) ? cookieToken : paramToken;
+//        User user = userService.getByToken(response, token);
+//        return user;
+        //拦截器首先执行  这个类后执行
 
-        String paramToken = request.getParameter(UserService.COOKI_NAME_TOKEN);
-        String cookieToken = getCookieValue(request, UserService.COOKI_NAME_TOKEN);
-
-        if (StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)) {
-            return null;
-        }
-        String token = StringUtils.isEmpty(paramToken) ? cookieToken : paramToken;
-        User user = userService.getByToken(response, token);
-        return user;
+        return UserContext.getUser();
     }
 
     private String getCookieValue(HttpServletRequest request, String cookiNameToken) {

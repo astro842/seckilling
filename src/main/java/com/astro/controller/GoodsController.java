@@ -60,7 +60,7 @@ public class GoodsController {
             return html;
         }
 
-        log.info("---------------第一次加入gl缓存");
+        log.info("---------------第一次加入goodsList缓存");
         List<GoodsVo> goodsVoList = goodsService.getGoodsVoList();
         log.info("---------------goodsVoList:" + goodsVoList);
         model.addAttribute("goodsVoList", goodsVoList);
